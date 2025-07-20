@@ -2,14 +2,16 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
+
+
 function getFirebaseConfig() {
   return {
-    apiKey: "AIzaSyApGyhS1EQ0pN9kZOf-YJH-uP55FlNb1BY",
-    authDomain: "fe-bootcamp-week9.firebaseapp.com",
-    projectId: "fe-bootcamp-week9",
-    storageBucket: "fe-bootcamp-week9.firebasestorage.app",
-    messagingSenderId: "614215837920",
-    appId: "1:614215837920:web:ecd43a6428d23bf9350885",
+    apiKey: process.env.NEXT_PUBLIC_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_APP_ID,
   };
 }
 
