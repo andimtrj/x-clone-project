@@ -151,7 +151,7 @@ export default function Register() {
         username: form.username,
       });
 
-      router.push("/");
+      router.push("/home");
     } catch (err) {
       setError({ register: err.message || "Registration failed" });
     }
