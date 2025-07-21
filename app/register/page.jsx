@@ -29,8 +29,8 @@ export default function Register() {
     age: "",
     dob: null,
   });
-
   const [error, setError] = useState({});
+  const [submitted, setSubmitted] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -123,6 +123,8 @@ export default function Register() {
   };
 
   const handleRegister = async () => {
+    setSubmitted(true); // Mark form as submitted
+
     const validationErrors = await validate();
 
     if (Object.keys(validationErrors).length > 0) {
@@ -244,7 +246,7 @@ export default function Register() {
           </form>
         </CardContent>
       </Card>
-      {Object.keys(error).length > 0 && (
+      {submitted && Object.keys(error).length > 0 && (
         <Alert variant="destructive" className="w-1/4">
           <AlertCircleIcon />
           <AlertTitle>Unable to process your registration.</AlertTitle>
@@ -254,6 +256,7 @@ export default function Register() {
               {error.email && <li>{error.email}</li>}
               {error.username && <li>{error.username}</li>}
               {error.password && <li>{error.password}</li>}
+              {error.confirmPassword && <li>{error.confirmPassword}</li>}
               {error.displayName && <li>{error.displayName}</li>}
               {error.age && <li>{error.age}</li>}
               {error.dob && <li>{error.dob}</li>}

@@ -1,5 +1,6 @@
 import { Poppins } from "next/font/google";
 import "./globals.css";
+import ClientLayout from "@/components/client-layout";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -15,10 +16,8 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body
-        className={`${poppins.variable}`}
-      >
-        {children}
+      <body className={`${poppins.variable}`}>
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );
