@@ -121,18 +121,16 @@ export default function Register() {
       age: "",
     }));
   };
+
   const handleRegister = async () => {
-    const { db, auth } = getConfig();
+    const validationErrors = await validate();
 
-    // Validasi username unik
-    const usersRef = collection(db, "users");
-    const q = query(usersRef, where("username", "==", form.username));
-    const usernameSnapshot = await getDocs(q);
-
-    if (!usernameSnapshot.empty) {
-      setError({ username: "Username is already taken" });
+    if (Object.keys(validationErrors).length > 0) {
+      setError(validationErrors);
       return;
     }
+
+    const { db, auth } = getConfig();
 
     try {
       const userCredential = await createUserWithEmailAndPassword(
@@ -206,11 +204,6 @@ export default function Register() {
                 onChange={handleChange}
                 value={form.confirmPassword}
               />
-              {error.confirmPassword && (
-                <p className="text-red-500 text-sm mb-2">
-                  {error.confirmPassword}
-                </p>
-              )}
             </div>
 
             <Input
@@ -251,22 +244,24 @@ export default function Register() {
           </form>
         </CardContent>
       </Card>
-      <Alert variant="destructive" className={'w-1/4'}>
-        <AlertCircleIcon />
-        <AlertTitle>Unable to process your registration.</AlertTitle>
-        <AlertDescription>
-          <p>Please verify information and try again.</p>
-          <ul className="list-inside list-disc text-sm">
-            {error.email && <li>{error.email}</li>}
-            {error.username && <li>{error.username}</li>}
-            {error.password && <li>{error.password}</li>}
-            {error.displayName && <li>{error.displayName}</li>}
-            {error.age && <li>{error.age}</li>}
-            {error.dob && <li>{error.dob}</li>}
-            {error.register && <li>{error.register}</li>}
-          </ul>
-        </AlertDescription>
-      </Alert>
+      {Object.keys(error).length > 0 && (
+        <Alert variant="destructive" className="w-1/4">
+          <AlertCircleIcon />
+          <AlertTitle>Unable to process your registration.</AlertTitle>
+          <AlertDescription>
+            <p>Please verify information and try again.</p>
+            <ul className="list-inside list-disc text-sm">
+              {error.email && <li>{error.email}</li>}
+              {error.username && <li>{error.username}</li>}
+              {error.password && <li>{error.password}</li>}
+              {error.displayName && <li>{error.displayName}</li>}
+              {error.age && <li>{error.age}</li>}
+              {error.dob && <li>{error.dob}</li>}
+              {error.register && <li>{error.register}</li>}
+            </ul>
+          </AlertDescription>
+        </Alert>
+      )}
     </div>
   );
 }
