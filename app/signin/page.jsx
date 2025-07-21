@@ -47,7 +47,7 @@ export default function SignIn() {
       const email = userData.email;
 
       await signInWithEmailAndPassword(auth, email, form.password);
-      router.push("/");
+      router.push("/home");
     } catch (error) {
       setErrors({
         login: error.message || "Login failed. Please try again.",
