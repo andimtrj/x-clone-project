@@ -12,12 +12,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-export function DatePicker() {
+export function DatePicker({ value, onChange }) {
   const [open, setOpen] = React.useState(false);
-  const [date, setDate] = React.useState(undefined);
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2">
       <Label htmlFor="date" className="px-1">
         Date of birth
       </Label>
@@ -26,19 +25,19 @@ export function DatePicker() {
           <Button
             variant="outline"
             id="date"
-            className="w-48 justify-between font-normal"
+            className="w-48 justify-between font-normal cursor-pointer"
           >
-            {date ? date.toLocaleDateString() : "Select date"}
+            {value ? value.toLocaleDateString() : "Select date"}
             <ChevronDownIcon />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto overflow-hidden p-0" align="start">
           <Calendar
             mode="single"
-            selected={date}
+            selected={value}
             captionLayout="dropdown"
             onSelect={(date) => {
-              setDate(date);
+              onChange(date);
               setOpen(false);
             }}
           />

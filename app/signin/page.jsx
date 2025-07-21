@@ -15,7 +15,7 @@ export default function SignIn() {
           <CardTitle className={"text-3xl"}>Sign in to X</CardTitle>
         </CardHeader>
         <CardContent>
-          <Input placeholder="Username" type="text" className={"mb-4"} />
+          <Input placeholder="Username" type="text" className={"mb-2"} />
           <Input placeholder="Password" type="password" className={"mb-4"} />
           <Button className={"w-full mb-4"}>Sign In</Button>
           <p className="w-full text-center">
