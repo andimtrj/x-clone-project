@@ -48,7 +48,6 @@ export default function HomeLayout({ children }) {
         <div className="px-3 text-sm">
           {user ? (
             <div className="flex hover:bg-gray-200 rounded-xl cursor-pointer" onClick={() => router.push(`/profile/${user.uid}`)}>
-              <Image src={''} alt={'Profile Picture'} width={24} height={24}/>
               <div className="mb-2 flex flex-col gap-1">
                 <p className="font-semibold">{user.displayName}</p>
                 <p className="text-gray-500">@{user.username}</p>
