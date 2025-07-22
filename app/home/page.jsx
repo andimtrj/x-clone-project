@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import getConfig from "@/firebase/config";
 
@@ -20,6 +20,7 @@ export default function HomePage() {
 
     return () => unsubscribe();
   }, []);
+  
   const fetchFeed = async (userId) => {
     try {
       // Ambil dokumen user saat ini
@@ -83,12 +84,12 @@ export default function HomePage() {
 }
 
 // ✅ PostCard component langsung di bawah sini
-function PostCard({ id, userId, content, timestamp }) {
+function PostCard({ id, userId, content, timestamp, }) {
   const date = timestamp?.toDate?.() ?? new Date(); // convert Firestore Timestamp
 
   return (
     <div className="border rounded-lg p-4 shadow mb-4 bg-white">
-      <div className="text-sm text-gray-600 mb-1">👤 User ID: {userId}</div>
+      <div className="text-sm text-gray-600 mb-1">👤 User ID: {id}</div>
       <div className="text-base text-gray-800">{content}</div>
       <div className="text-xs text-gray-400 mt-2">
         🕒 {date.toLocaleString()}
