@@ -9,10 +9,12 @@ import {
   getDoc,
   getDocs,
   query,
-  updateDoc,
   where,
 } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
+import { User, Pencil } from "lucide-react";
+import YouMayKnow from "../YouMayKnow";
+import EditProfileModal from "../EditProfile";
 import { Button } from "@/components/ui/button";
 
 export default function ProfilePage() {
@@ -24,6 +26,7 @@ export default function ProfilePage() {
   const [userData, setUserData] = useState(null);
   const [userTweets, setUserTweets] = useState([]);
   const [showYouMayKnow, setShowYouMayKnow] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -42,8 +45,9 @@ export default function ProfilePage() {
         const userDoc = await getDoc(doc(db, "users", userId));
         setUserData(userDoc.data());
 
-        // Show "You may know" only if visiting own profile
-        if (currentUser?.uid === userId) setShowYouMayKnow(true);
+        if (currentUser?.uid === userId) {
+          setShowYouMayKnow(true);
+        }
       } catch (err) {
         console.error("Failed to fetch profile data", err);
       }
@@ -55,90 +59,72 @@ export default function ProfilePage() {
   if (!userData) return <div className="p-6">Loading...</div>;
 
   return (
-    <div className="max-w-xl mx-auto mt-10 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">{userData.displayName}</h1>
-        <p className="text-gray-600">@{userData.username}</p>
-        <p className="text-sm text-gray-400">{userData.email}</p>
-      </div>
-
-      <div>
-        <h2 className="text-xl font-semibold mb-2">Posts</h2>
-        <div className="space-y-4">
-          {userTweets.map((tweet) => (
-            <div key={tweet.id} className="border p-4 rounded-lg">
-              <p>{tweet.content}</p>
-              <p className="text-xs text-gray-400 mt-2">
-                {tweet.timestamp?.toDate().toLocaleString()}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {showYouMayKnow && <YouMayKnow currentUserId={currentUser?.uid} />}
-    </div>
-  );
-}
-
-function YouMayKnow({ currentUserId }) {
-  const { db } = getConfig();
-  const [users, setUsers] = useState([]);
-  const [currentFollowing, setCurrentFollowing] = useState([]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      // Get all users except the current user
-      const q = query(collection(db, "users"), where("uid", "!=", currentUserId));
-      const snap = await getDocs(q);
-      const allUsers = snap.docs
-        .map((doc) => doc.data())
-        .filter((u) => u.uid !== currentUserId); // fallback
-
-      setUsers(allUsers);
-
-      // Get current user followings
-      const currentSnap = await getDoc(doc(db, "users", currentUserId));
-      const currentData = currentSnap.data();
-      setCurrentFollowing(currentData.following || []);
-    };
-
-    fetchData();
-  }, [db, currentUserId]);
-
-  const toggleFollow = async (targetUserId) => {
-    const userRef = doc(db, "users", currentUserId);
-    const newFollow = currentFollowing.includes(targetUserId)
-      ? currentFollowing.filter((id) => id !== targetUserId)
-      : [...currentFollowing, targetUserId];
-
-    await updateDoc(userRef, { following: newFollow });
-    setCurrentFollowing(newFollow);
-  };
-
-  return (
     <div>
-      <h2 className="text-xl font-semibold mt-8 mb-2">You May Know</h2>
-      <div className="space-y-3">
-        {users.map((user) => (
-          <div
-            key={user.uid}
-            className="flex items-center justify-between border p-3 rounded-lg"
-          >
-            <div>
-              <p className="font-medium">{user.displayName}</p>
-              <p className="text-sm text-gray-500">@{user.username}</p>
+      <h2 className="text-2xl font-bold mb-2">Your Profile</h2>
+      <div className="flex items-center gap-4 mb-4">
+        <div className="relative">
+          {userData.photoUrl ? (
+            <img
+              src={userData.photoUrl}
+              alt="Profile"
+              className="h-16 w-16 rounded-full border-2 border-black object-cover"
+            />
+          ) : (
+            <div className="flex items-center justify-center h-16 w-16 rounded-full border-2 border-black">
+              <User height={40} width={40} />
             </div>
-            <Button
-              size="sm"
-              onClick={() => toggleFollow(user.uid)}
-              variant={currentFollowing.includes(user.uid) ? "secondary" : "default"}
-            >
-              {currentFollowing.includes(user.uid) ? "Unfollow" : "Follow"}
-            </Button>
-          </div>
-        ))}
+          )}
+        </div>
+
+        <div>
+          <h3 className="text-xl font-bold">{userData.displayName}</h3>
+          <h3 className="text-gray-400">@{userData.username}</h3>
+        </div>
+
+        {currentUser?.uid === userId && (
+          <Button
+            className="ml-auto flex items-center gap-2 cursor-pointer"
+            onClick={() => setShowEditModal(true)}
+          >
+            <Pencil size={16} />
+            Edit Profile
+          </Button>
+        )}
       </div>
+
+      <div className="flex gap-6 max-h-[75vh]">
+        {/* Posts section */}
+        <div className="flex-1 overflow-y-scroll pr-2">
+          <h2 className="text-xl font-semibold mb-2">Posts</h2>
+          <div className="space-y-4">
+            {userTweets.map((tweet) => (
+              <div key={tweet.id} className="border p-4 rounded-lg">
+                <p>{tweet.content}</p>
+                <p className="text-xs text-gray-400 mt-2">
+                  {tweet.timestamp?.toDate().toLocaleString()}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* You May Know section */}
+        {showYouMayKnow && (
+          <div className="w-1/3 overflow-y-scroll pr-2">
+            <YouMayKnow currentUserId={currentUser?.uid} />
+          </div>
+        )}
+      </div>
+
+      {/* Modal */}
+      {showEditModal && (
+        <EditProfileModal
+          userId={userId}
+          userData={userData}
+          onClose={() => setShowEditModal(false)}
+          onUpdate={(updatedData) => setUserData(updatedData)}
+        />
+      )}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircleIcon } from "lucide-react";
+import { AlertCircleIcon, Loader2 } from "lucide-react";
 import getConfig from "@/firebase/config";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { collection, query, where, getDocs } from "firebase/firestore";
@@ -15,6 +15,7 @@ export default function SignIn() {
   const [form, setForm] = useState({ username: "", password: "" });
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (event) => {
     setForm({
@@ -26,10 +27,12 @@ export default function SignIn() {
 
   const handleLogin = async () => {
     setSubmitted(true);
+    setIsLoading(true);
     const { auth, db } = getConfig();
 
     if (!form.username || !form.password) {
       setErrors({ login: "Username and password are required." });
+      setIsLoading(false);
       return;
     }
 
@@ -40,6 +43,7 @@ export default function SignIn() {
 
       if (snapshot.empty) {
         setErrors({ login: "Username not found." });
+        setIsLoading(false);
         return;
       }
 
@@ -52,6 +56,8 @@ export default function SignIn() {
       setErrors({
         login: error.message || "Login failed. Please try again.",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -78,8 +84,19 @@ export default function SignIn() {
             onChange={handleChange}
             value={form.password}
           />
-          <Button className="w-full mb-4" onClick={handleLogin}>
-            Sign In
+          <Button
+            className="w-full mb-4 cursor-pointer"
+            onClick={handleLogin}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <div className="flex items-center justify-center gap-2">
+                <Loader2 className="animate-spin h-4 w-4" />
+                Signing in...
+              </div>
+            ) : (
+              "Sign In"
+            )}
           </Button>
           <p className="w-full text-center">
             Don't have an account?{" "}

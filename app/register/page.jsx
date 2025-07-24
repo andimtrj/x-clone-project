@@ -14,7 +14,7 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
-import { AlertCircleIcon } from "lucide-react";
+import { AlertCircleIcon, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -31,6 +31,7 @@ export default function Register() {
   });
   const [error, setError] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -96,7 +97,7 @@ export default function Register() {
         newErrors.dob = "You must be at least 17 years old";
       }
     }
-
+    setIsLoading(false);
     return newErrors;
   };
 
@@ -124,11 +125,13 @@ export default function Register() {
 
   const handleRegister = async () => {
     setSubmitted(true); // Mark form as submitted
-
+    setIsLoading(true);
+    setError({});
     const validationErrors = await validate();
 
     if (Object.keys(validationErrors).length > 0) {
       setError(validationErrors);
+      setIsLoading(false);
       return;
     }
 
@@ -154,6 +157,8 @@ export default function Register() {
       router.push("/home");
     } catch (err) {
       setError({ register: err.message || "Registration failed" });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -230,8 +235,15 @@ export default function Register() {
               />
             </div>
 
-            <Button type="submit" className="w-full mb-4">
-              Register
+            <Button type="submit" className="w-full mb-4 cursor-pointer">
+              {isLoading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <Loader2 className="animate-spin h-4 w-4" />
+                  Registering
+                </div>
+              ) : (
+                "Register"
+              )}
             </Button>
 
             <p className="w-full text-center">
@@ -246,7 +258,7 @@ export default function Register() {
           </form>
         </CardContent>
       </Card>
-      {submitted && Object.keys(error).length > 0 && (
+      {submitted && Object.values(error).some((e) => e) && (
         <Alert variant="destructive" className="w-1/4">
           <AlertCircleIcon />
           <AlertTitle>Unable to process your registration.</AlertTitle>
