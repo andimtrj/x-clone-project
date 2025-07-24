@@ -5,7 +5,7 @@ import { signOut } from "firebase/auth";
 import { Bookmark, Earth, House, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
-import useUser from "@/hooks/useUser"; 
+import useUser from "@/hooks/useUser";
 import Image from "next/image";
 
 export default function HomeLayout({ children }) {
@@ -32,22 +32,25 @@ export default function HomeLayout({ children }) {
               <House /> Home
             </a>
             <a
-              href="/explore"
+              href="#"
               className="flex gap-3 items-center hover:bg-gray-200 px-3 py-2 rounded-xl"
             >
               <Earth /> Explore
             </a>
             <a
-              href="/bookmark"
+              href="#"
               className="flex gap-3 items-center hover:bg-gray-200 px-3 py-2 rounded-xl"
             >
               <Bookmark /> Bookmark
             </a>
           </div>
         </div>
-        <div className="px-3 text-sm">
+        <div className="text-sm">
           {user ? (
-            <div className="flex hover:bg-gray-200 rounded-xl cursor-pointer" onClick={() => router.push(`/profile/${user.uid}`)}>
+            <div
+              className="flex hover:bg-gray-200 rounded-xl cursor-pointer px-3 py-1"
+              onClick={() => router.push(`/profile/${user.uid}`)}
+            >
               <div className="mb-2 flex flex-col gap-1">
                 <p className="font-semibold">{user.displayName}</p>
                 <p className="text-gray-500">@{user.username}</p>
@@ -56,9 +59,14 @@ export default function HomeLayout({ children }) {
           ) : (
             <p>Loading user...</p>
           )}
-          <Button onClick={handleLogout} className="cursor-pointer w-full mt-2">
-            Sign Out
-          </Button>
+          <div className="px-3">
+            <Button
+              onClick={handleLogout}
+              className="cursor-pointer w-full mt-2"
+            >
+              Sign Out
+            </Button>
+          </div>
         </div>
       </div>
 
