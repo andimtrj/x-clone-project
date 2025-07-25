@@ -14,12 +14,15 @@ import {
 import { onAuthStateChanged } from "firebase/auth";
 import getConfig from "@/firebase/config";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import PostsList from "@/components/PostList";
 
 export default function HomePage() {
   const { auth, db } = getConfig();
   const [currentUser, setCurrentUser] = useState(null);
   const [tweets, setTweets] = useState([]);
   const [newTweet, setNewTweet] = useState("");
+  const [photoUrl, setPhotoUrl] = useState("");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -27,7 +30,7 @@ export default function HomePage() {
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (userDoc.exists()) {
           const userData = userDoc.data();
-          setCurrentUser({ uid: user.uid, ...userData }); // ✅ Ambil data Firestore, bukan dari `user`
+          setCurrentUser({ uid: user.uid, ...userData });
           await fetchFeed(user.uid);
         }
       }
@@ -47,11 +50,8 @@ export default function HomePage() {
 
       const userData = userDoc.data();
       const followedUserIds = userData.following || [];
-
-      // Tambahkan user sendiri agar tweet sendiri juga muncul di feed
       const allUserIds = [...followedUserIds, userId];
 
-      // Firestore 'in' query dibatasi max 10 elemen
       const chunks = [];
       for (let i = 0; i < allUserIds.length; i += 10) {
         chunks.push(allUserIds.slice(i, i + 10));
@@ -80,11 +80,13 @@ export default function HomePage() {
   };
 
   const handleTweetSubmit = async () => {
-    if (!newTweet.trim() || !currentUser) return;
+    if (!newTweet.trim() && !photoUrl.trim()) return;
+    if (!currentUser) return;
 
     try {
       const tweetData = {
         content: newTweet.trim(),
+        photoUrl: photoUrl.trim() || null,
         userId: currentUser.uid,
         displayName: currentUser.displayName || "Anon",
         username: currentUser.username || "unknown",
@@ -93,11 +95,13 @@ export default function HomePage() {
 
       await addDoc(collection(db, "tweets"), tweetData);
       setNewTweet("");
-      await fetchFeed(currentUser.uid); // refresh feed
+      setPhotoUrl("");
+      await fetchFeed(currentUser.uid);
     } catch (err) {
       console.error("Failed to post tweet:", err);
     }
   };
+
   return (
     <div className="p-4 max-w-2xl mx-auto">
       <h2 className="text-2xl font-bold mb-4">Home Feed</h2>
@@ -107,38 +111,25 @@ export default function HomePage() {
           <textarea
             className="w-full p-2 border rounded mb-2"
             rows={3}
-            placeholder="What's in you mind?"
+            placeholder="What's in your mind?"
             value={newTweet}
             onChange={(e) => setNewTweet(e.target.value)}
           />
-          <Button onClick={handleTweetSubmit}>Post</Button>
+          <Input
+            type="text"
+            className="w-full p-2 border rounded mb-2"
+            placeholder="Photo URL (optional)"
+            value={photoUrl}
+            onChange={(e) => setPhotoUrl(e.target.value)}
+          />
+          <Button onClick={handleTweetSubmit} className="cursor-pointer">
+            Post
+          </Button>
         </div>
       )}
 
       <div className="space-y-4 max-h-[36vw] overflow-y-scroll pr-2">
-        {tweets.length > 0 ? (
-          tweets.map((tweet) => <PostCard key={tweet.id} {...tweet} />)
-        ) : (
-          <p className="text-gray-500">Go follow someone!</p>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ✅ PostCard diperluas untuk menampilkan displayName & username
-function PostCard({ content, timestamp, displayName, username }) {
-  const date = timestamp?.toDate?.() ?? new Date();
-
-  return (
-    <div className="border rounded-lg p-4 shadow mb-4 bg-white">
-      <div className="flex items-center gap-2 mb-1 text-sm text-gray-600">
-        <span className="font-semibold">{displayName || "Anon"}</span>
-        <span className="text-gray-400">@{username || "unknown"}</span>
-      </div>
-      <div className="text-base text-gray-800">{content}</div>
-      <div className="text-xs text-gray-400 mt-2">
-        🕒 {date.toLocaleString()}
+        <PostsList tweets={tweets} />
       </div>
     </div>
   );

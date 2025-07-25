@@ -16,6 +16,7 @@ import { User, Pencil } from "lucide-react";
 import YouMayKnow from "../YouMayKnow";
 import EditProfileModal from "../EditProfile";
 import { Button } from "@/components/ui/button";
+import PostsList from "@/components/PostList";
 
 export default function ProfilePage() {
   const { db, auth } = getConfig();
@@ -97,14 +98,7 @@ export default function ProfilePage() {
         <div className="flex-1 overflow-y-scroll pr-2">
           <h2 className="text-xl font-semibold mb-2">Posts</h2>
           <div className="space-y-4">
-            {userTweets.map((tweet) => (
-              <div key={tweet.id} className="border p-4 rounded-lg">
-                <p>{tweet.content}</p>
-                <p className="text-xs text-gray-400 mt-2">
-                  {tweet.timestamp?.toDate().toLocaleString()}
-                </p>
-              </div>
-            ))}
+            <PostsList tweets={userTweets} />
           </div>
         </div>
 
